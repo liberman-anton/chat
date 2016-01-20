@@ -35,8 +35,9 @@ public class Main {
                             if (line == null || "exit".equals(line))
                                 break;
                             for (Socket s : clients) {
+                                System.out.println("Got line:\n" + line);
                                 try {
-                                    s.getOutputStream().write(line.getBytes());
+                                    s.getOutputStream().write((line+"\n").getBytes());
                                 } catch (IOException e) {
                                 }
                             }
