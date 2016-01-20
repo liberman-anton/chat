@@ -5,10 +5,18 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Main {
+    static Set<Socket> clients = new HashSet<>();
+
+    static synchronized void addClient(Socket client) {
+        clients.add(client);
+    }
+
+    static synchronized void removeClient(Socket client) {
+        clients.remove(client);
+    }
+
     public static void main(String[] args) throws IOException {
         ServerSocket ss = new ServerSocket(8083);
-
-        Set<Socket> clients = new HashSet<>();
 
         while (true) {
             Socket accept = ss.accept();
@@ -17,15 +25,20 @@ public class Main {
                 @Override
                 public void run() {
                     try {
+                        addClient(accept);
+
                         InputStream inputStream = accept.getInputStream();
                         OutputStream outputStream = accept.getOutputStream();
                         BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
                         while (true) {
                             String line = br.readLine();
-                            if ("exit".equals(line))
+                            if (line == null || "exit".equals(line))
                                 break;
                             for (Socket s : clients) {
-                                s.getOutputStream().write(line.getBytes());
+                                try {
+                                    s.getOutputStream().write(line.getBytes());
+                                } catch (IOException e) {
+                                }
                             }
 
                             try {
@@ -37,10 +50,9 @@ public class Main {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
+                    removeClient(accept);
                 }
             }).start();
-
-            clients.add(accept);
 
         }
     }
