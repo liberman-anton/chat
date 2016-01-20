@@ -6,10 +6,26 @@ public class Main {
     public static void main(String[] args) throws IOException {
         ServerSocket ss = new ServerSocket(8083);
 
-        Socket accept = ss.accept();
+        while (true) {
+            Socket accept = ss.accept();
 
-        accept.getOutputStream().write("Hello".getBytes());
-
-        accept.close();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        while (true) {
+                            accept.getOutputStream().write("Hello".getBytes());
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
     }
 }
